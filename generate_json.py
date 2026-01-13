@@ -1,4 +1,4 @@
-'''
+"""
 Author: Vincent Young
 Date: 2023-10-06 05:43:37
 LastEditors: Vincent Young
@@ -6,20 +6,26 @@ LastEditTime: 2023-10-06 05:47:41
 FilePath: /OwO-Repo/generate_json.py
 Telegram: https://t.me/missuo
 
-Copyright © 2023 by Vincent, All Rights Reserved. 
-'''
-from github import Github
-import json
+Copyright © 2023 by Vincent, All Rights Reserved.
+"""
+
 import argparse
-import pandas as pd
-from get_bundle_id import get_single_bundle_id
+import json
 import os
 import shutil
 
+import pandas as pd
+from github import Github
+
+from get_bundle_id import get_single_bundle_id
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--token", help="Github token")
+    parser.add_argument(
+        "--repo",
+        help="GitHub repo in owner/name format (defaults to $GITHUB_REPOSITORY)",
+    )
     args = parser.parse_args()
     token = args.token
 
@@ -38,7 +44,7 @@ if __name__ == "__main__":
     data["apps"] = []
 
     g = Github(token)
-    repo_name = "owo-network/Repo"
+    repo_name = "Zach677/Repo"
     repo = g.get_repo(repo_name)
     releases = repo.get_releases()
 
@@ -65,8 +71,10 @@ if __name__ == "__main__":
                 bundle_id = str(df[df.name == app_name].bundleId.values[0])
             else:
                 bundle_id = get_single_bundle_id(asset.browser_download_url)
-                df = pd.concat([df, pd.DataFrame(
-                    {"name": [app_name], "bundleId": [bundle_id]})], ignore_index=True)
+                df = pd.concat(
+                    [df, pd.DataFrame({"name": [app_name], "bundleId": [bundle_id]})],
+                    ignore_index=True,
+                )
 
             data["apps"].append(
                 {
@@ -83,14 +91,14 @@ if __name__ == "__main__":
                     "developerName": "",
                     "localizedDescription": tweaks,
                     "icon": f"https://raw.githubusercontent.com/{repo_name}/main/icons/{bundle_id}.png",
-                    "iconURL": f"https://raw.githubusercontent.com/{repo_name}/main/icons/{bundle_id}.png"
+                    "iconURL": f"https://raw.githubusercontent.com/{repo_name}/main/icons/{bundle_id}.png",
                 }
             )
             data["apps"].sort(key=lambda x: x["fullDate"], reverse=True)
 
     df.to_csv("bundleId.csv", index=False)
 
-    with open(out_file, 'w') as json_file:
+    with open(out_file, "w") as json_file:
         json.dump(data, json_file, indent=4)
 
     shutil.copyfile(out_file, clone_file)

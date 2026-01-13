@@ -64,7 +64,9 @@ def get_single_bundle_id(url, name="temp.ipa"):
     return "com.example.app"
 
 
-def generate_bundle_id_csv(token, repo_name="owo-network/Repo"):
+def generate_bundle_id_csv(token, repo_name=None):
+    if not repo_name:
+        repo_name = os.environ.get("GITHUB_REPOSITORY", "Zach677/Repo")
     g = github.Github(token)
     repo = g.get_repo(repo_name)
     releases = repo.get_releases()
